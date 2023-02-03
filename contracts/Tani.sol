@@ -8,32 +8,32 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 contract TaniNFT is ERC721, Ownable {
     string public baseURIextended;
 
-    uint public totalSupply;
-    uint public maxSupply;
+    uint256 private id = 5000;
+    uint256 public constant maxSupply = 5000;
 
     bool public notPaused;
-    bool public revealed;
+    bool private revealed;
 
-    address[] public addresses;
-
-    mapping(address => bool) public minted;
-    mapping(address => bool) public wl;
+    mapping(address => bool) private minted;
+    mapping(address => bool) private wl;
 
     bytes32 public root;
 
-    constructor(uint _maxSupply) ERC721("Tanim0la NFT", "tanim0la") {
-        maxSupply = _maxSupply;
-    }
+    constructor() ERC721("Tanim0la NFT", "tanim0la") {}
 
     function MintNft(bytes32[] memory proof) public {
+        address _sender = msg.sender;
         require(notPaused, "MINT IS PAUSED!!!");
-        require(isValid(proof, keccak256((abi.encodePacked(msg.sender)))), "ADDRESS NOT WHITELISTED!!!");
-        require(totalSupply < maxSupply, "MINTED OUT!!!");
-        require(!minted[msg.sender], "MINTED ALREADY!!!");
+        require(isValid(proof, keccak256((abi.encodePacked(_sender)))), "ADDRESS NOT WHITELISTED!!!");
+        unchecked{require(id > 0, "MINTED OUT!!!");}
+        require(!minted[_sender], "MINTED ALREADY!!!");
 
-        minted[msg.sender] = true;
-        _safeMint(msg.sender, totalSupply);
-        totalSupply++;
+        minted[_sender] = true;
+        unchecked {
+            _mint(_sender, id);
+            id--;
+        }
+
     }
 
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
@@ -60,8 +60,8 @@ contract TaniNFT is ERC721, Ownable {
         root = _root;
     }
 
-    function pausable() public onlyOwner {
-        notPaused = !notPaused;
+    function pausable(bool _state) public onlyOwner {
+        notPaused = _state;
     }
 
     function setRevealed() public onlyOwner {
@@ -69,14 +69,13 @@ contract TaniNFT is ERC721, Ownable {
     }
 
     function joinWl() public {
-        require(!wl[msg.sender], "ALREADY WHITELISTED!!!");
-        require(totalSupply < maxSupply, "WHITELIST CLOSED!!!");
-
-        wl[msg.sender] = true;
-        addresses.push(msg.sender);
+        address _sender = msg.sender;
+        require(!wl[_sender], "ALREADY WHITELISTED!!!");
+        unchecked {require(id > 0, "WHITELIST CLOSED!!!");}
+        wl[_sender] = true;
     }
 
-    function getAddresses() public view returns (address[] memory) {
-        return addresses;
+    function totalMinted() external view returns (uint256){
+        return maxSupply-id;
     }
 }
