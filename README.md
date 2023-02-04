@@ -1,2 +1,2 @@
-# Semi-Optimized NFT contract
+# Semi-Optimized NFT contract.
 
