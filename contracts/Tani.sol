@@ -21,7 +21,7 @@ contract TaniNFT is ERC721, Ownable {
 
     constructor() ERC721("Tanim0la NFT", "tanim0la") {}
 
-    function MintNft(bytes32[] memory proof) public {
+    function MintNft(bytes32[] memory proof) external {
         address _sender = msg.sender;
         require(notPaused, "MINT IS PAUSED!!!");
         require(isValid(proof, keccak256((abi.encodePacked(_sender)))), "ADDRESS NOT WHITELISTED!!!");
@@ -36,7 +36,7 @@ contract TaniNFT is ERC721, Ownable {
 
     }
 
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+    function tokenURI(uint256 tokenId) external view virtual override returns (string memory) {
         if (revealed) {
             return super.tokenURI(tokenId);
         } else {
@@ -52,23 +52,23 @@ contract TaniNFT is ERC721, Ownable {
         return baseURIextended;
     }
 
-    function isValid(bytes32[] memory proof, bytes32 leaf) public view returns (bool) {
+    function isValid(bytes32[] memory proof, bytes32 leaf) external view returns (bool) {
         return MerkleProof.verify(proof, root, leaf);
     }
 
-    function setRoot(bytes32 _root) public onlyOwner {
+    function setRoot(bytes32 _root) external onlyOwner {
         root = _root;
     }
 
-    function pausable(bool _state) public onlyOwner {
+    function pausable(bool _state) external onlyOwner {
         notPaused = _state;
     }
 
-    function setRevealed() public onlyOwner {
+    function setRevealed() external onlyOwner {
         revealed = true;
     }
 
-    function joinWl() public {
+    function joinWl() external {
         address _sender = msg.sender;
         require(!wl[_sender], "ALREADY WHITELISTED!!!");
         unchecked {require(id > 0, "WHITELIST CLOSED!!!");}
